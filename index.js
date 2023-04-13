@@ -90,3 +90,33 @@ appDiv.innerHTML = `<h1>Promise</h1>`;
   });
   console.log('Promise 7 - ', 4);
 }
+
+{
+  const promise8 = new Promise((resolve, reject) => {
+    console.log('Promise 8 - ', 1);
+    resolve('Promise 8 -  success');
+  });
+  promise8
+    .then(() => {
+      console.log('then 1');
+      throw 'error';
+    })
+    .then(() => {
+      console.log('then 2');
+    })
+    .then(() => {
+      console.log('then 3');
+    })
+    .then(() => {
+      console.log('then 4');
+    })
+    .catch(() => {
+      console.log('catch 1');
+    })
+    .finally(() => {
+      console.log('finally 1');
+    })
+    .then(() => {
+      console.log('then 5');
+    });
+}
