@@ -120,3 +120,99 @@ appDiv.innerHTML = `<h1>Promise</h1>`;
       console.log('then 5');
     });
 }
+
+const promise1 = () =>
+  new Promise((resolve) => setTimeout(() => resolve(1), 1000));
+const promise2 = () =>
+  new Promise((resolve) => setTimeout(() => resolve(2), 2000));
+const promise3 = () =>
+  new Promise((resolve) => setTimeout(() => resolve(3), 3000));
+
+const arr = [promise1, promise2, promise3];
+
+Array.prototype.myAll = function () {
+  return new Promise((resolve, reject) => {
+    const result = [];
+    for (let i = 0; i < this.length; i++) {
+      this[i]()
+        .then((res) => {
+          result.push(res);
+          if (result.length === this.length) {
+            resolve(result);
+          }
+        })
+        .catch((e) => {
+          reject(e);
+        });
+    }
+  });
+};
+
+Array.prototype.myAllSettled = function () {
+  return new Promise((resolve, reject) => {
+    const result = [];
+    let settledCount = 0;
+
+    for (let i = 0; i < this.length; i++) {
+      this[i]().then(
+        (res) => {
+          result[i] = { status: 'fulfilled', value: res };
+          settledCount++;
+          if (settledCount === this.length) {
+            resolve(result);
+          }
+        },
+        (e) => {
+          result[i] = { status: 'rejected', reason: e };
+          settledCount++;
+          if (settledCount === this.length) {
+            resolve(result);
+          }
+        }
+      );
+    }
+  });
+};
+
+Array.prototype.myAny = function () {
+  return new Promise((resolve, reject) => {
+    let settledCount = 0;
+
+    for (let i = 0; i < this.length; i++) {
+      this[i]()
+        .then((res) => {
+          resolve(res);
+        })
+        .catch((e) => {
+          settledCount++;
+          if (settledCount === this.length) {
+            reject(new Error('All promises were rejected'));
+          }
+        });
+    }
+  });
+};
+
+Array.prototype.myRace = function () {
+  return new Promise((resolve, reject) => {
+    for (let i = 0; i < this.length; i++) {
+      this[i]()
+        .then((res) => {
+          resolve(res);
+        })
+        .catch((e) => {
+          reject(e);
+        });
+    }
+  });
+};
+
+// Test
+arr
+  .myAll()
+  .then((result) => {
+    console.log(result); // Output: [1, 2, 3]
+  })
+  .catch((e) => {
+    console.error(e);
+  });
